@@ -1,0 +1,51 @@
+# Pipeline definition for CD after the CI pipeline runs.
+trigger: none
+
+resources:
+  pipelines:
+    - pipeline: az-vote-ci
+      source: "arc-cicd-demo-src CI"
+      trigger:
+        branches:
+          - master
+
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
+variables:
+  - group: az-vote-app-dev
+  - name: images_artifact_path
+    value: $(Pipeline.Workspace)/az-vote-ci/image_tags
+  - name: manifests_artifact_path
+    value: $(Pipeline.Workspace)/az-vote-ci/manifests
+  - name: utils_artifact_path
+    value: $(Pipeline.Workspace)/az-vote-ci/utils
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: "deploy_dev"
+    displayName: "Deploy to Dev"
+    jobs:
+      - deployment: Deploy_to_dev
+        displayName: "Deploy to Dev"
+        environment: dev
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: deployment-template.yaml
+
+  - stage: "deploy_stage"
+    displayName: "Deploy to Stage"
+    variables:
+      - group: az-vote-app-stage
+    jobs:
+      - deployment: Deploy_to_stage
+        displayName: "Deploy to Stage"
+        environment: stage
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: deployment-template.yaml

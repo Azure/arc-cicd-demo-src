@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  name: az-vote-front-ingress
+spec:
+  rules:
+    - http:
+        paths:
+          - path: { { .Values.demoAppUrl } }
+            pathType: Prefix
+            backend:
+              service:
+                name: azure-vote-front
+                port:
+                  number: 80

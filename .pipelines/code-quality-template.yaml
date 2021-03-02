@@ -1,0 +1,196 @@
+# Pipeline template to run linting and publish the results.
+
+# General strategy:
+# - Make use of cached containers where possible
+#   - https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md#cached-docker-images
+# - Publish as much as possible to save time fixing issues
+
+steps:
+  #
+  # Python
+  #
+  - task: Bash@3
+    displayName: Lint Python code with flake8
+    inputs:
+      targetType: "inline"
+      script: '
+        docker run --rm --name f8 --volume $(pwd):/src --workdir /src
+        python:3-alpine
+        sh -c "
+        pip install flake8==3.8.* flake8-json junit-xml;
+        flake8 --format json --output-file=flake8-testresults.json;
+        cat flake8-testresults.json;
+        python .pipelines/utils/flake8json2junitxml.py < flake8-testresults.json;
+        cat flake8-testresults.xml
+        "
+
+        exit 0'
+      failOnStderr: false
+
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFiles: "flake8-testresults.xml"
+      testRunTitle: "Python linting (flake8)"
+      failTaskOnFailedTests: false
+    displayName: "Publish flake8 test results"
+
+  #
+  # Docker
+  #
+  - task: Bash@3
+    displayName: Lint Dockerfiles code with hadolint
+    inputs:
+      targetType: "inline"
+      script: "
+        docker run --rm --name hl --volume $(pwd):/src --workdir /src
+        hadolint/hadolint:v1.19.0
+        hadolint --format=json **/Dockerfile > hadolint-testresults.json
+
+        exit 0
+        "
+      failOnStderr: false
+
+  - task: Bash@3
+    displayName: Convert Hadolint results
+    inputs:
+      targetType: "inline"
+      script: '
+        docker run --rm --name f8 --volume $(pwd):/src --workdir /src
+        python:3-alpine
+        sh -c "
+        pip install junit-xml
+        && python .pipelines/utils/hadolint2junitxml.py < hadolint-testresults.json
+        "
+
+        exit 0'
+      failOnStderr: false
+
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFiles: "hadolint-testresults.xml"
+      testRunTitle: "Dockerfile linting (hadolint)"
+      failTaskOnFailedTests: false
+    displayName: "Publish hadolint test results"
+
+  #
+  # Markdown
+  #
+  - task: Bash@3
+    displayName: Lint markdown code with markdownlint
+    inputs:
+      targetType: "inline"
+      script: "
+        docker run --rm --name mdl --volume $(pwd):/src --workdir /src
+        pipelinecomponents/markdownlint:0.6.1
+        mdl --json **/*.md > markdownlint-testresults.json
+
+        exit 0
+        "
+      failOnStderr: false
+
+  - task: Bash@3
+    displayName: Convert Markdownlint results
+    inputs:
+      targetType: "inline"
+      script: '
+        docker run --rm --name f8 --volume $(pwd):/src --workdir /src
+        python:3-alpine
+        sh -c "
+        pip install junit-xml
+        && python .pipelines/utils/markdownlint2junitxml.py < markdownlint-testresults.json
+        "
+
+        exit 0'
+      failOnStderr: false
+
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFiles: "markdownlint-testresults.xml"
+      testRunTitle: "Markdown linting (markdownlint)"
+      failTaskOnFailedTests: false
+    displayName: "Publish markdownlint test results"
+
+  #
+  # YAML
+  #
+  - task: Bash@3
+    displayName: Lint YAML with yamllint
+    inputs:
+      targetType: "inline"
+      script: "
+        docker run --rm --name yl --volume $(pwd):/src --workdir /src
+        cytopia/yamllint:1.23
+        --format parsable . > yamllint-testresults.json
+
+        cat yamllint-testresults.json
+
+        exit 0
+        "
+      failOnStderr: false
+
+  - task: Bash@3
+    displayName: Convert yamllint results
+    inputs:
+      targetType: "inline"
+      script: '
+        docker run --rm --name f8 --volume $(pwd):/src --workdir /src
+        python:3-alpine
+        sh -c "
+        pip install junit-xml
+        && python .pipelines/utils/yamllint2junitxml.py < yamllint-testresults.json
+        "
+
+        exit 0'
+      failOnStderr: false
+
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFiles: "yamllint-testresults.xml"
+      testRunTitle: "YAML linting (yamllint)"
+      failTaskOnFailedTests: false
+    displayName: "Publish yamllint test results"
+
+  #
+  # Kubernetes
+  #
+  - task: Bash@3
+    displayName: Lint Kubernetes YAML with kube-score
+    inputs:
+      targetType: "inline"
+      script: "
+        docker run --rm --name k8sl --volume $(pwd):/src --workdir /src
+        zegl/kube-score:v1.10.0
+        score --output-format json clusters-config-templates/argocd/notifications/* > kubescore-testresults.json
+
+        cat kubescore-testresults.json
+
+        exit 0
+        "
+      failOnStderr: false
+
+  - task: Bash@3
+    displayName: Convert kube-score results
+    inputs:
+      targetType: "inline"
+      script: '
+        docker run --rm --name f8 --volume $(pwd):/src --workdir /src
+        python:3-alpine
+        sh -c "
+        pip install junit-xml
+        && python .pipelines/utils/kubescore2junitxml.py < kubescore-testresults.json
+        "
+
+        exit 0'
+      failOnStderr: false
+
+  - task: PublishTestResults@2
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFiles: "kubescore-testresults.xml"
+      testRunTitle: "Kubernetes YAML linting (kube-score)"
+      failTaskOnFailedTests: false
+    displayName: "Publish kube-score test results"

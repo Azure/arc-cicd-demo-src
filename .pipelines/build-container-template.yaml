@@ -1,0 +1,60 @@
+# Template to check if the current version of the container source code has already been published.
+# If a match is found, the container will not be built.
+# If a match is not found, the container will be built, published, and tagged with a hash of the source code directory.
+
+parameters:
+  - name: sourceLocation # source code directory path
+    type: string
+  - name: dockerFile # relative path to Dockerfile from sourceLocation
+    type: string
+  - name: containerReferences # space (' ') delimited set of files or folders in sourceLocation to check for changes
+    type: string
+    default: "."
+  - name: acr # name of Azure Container Registry
+    type: string
+  - name: repository # name of container repository
+    type: string
+  - name: taskname # unique identifier for the task
+    type: string
+  - name: customArguments # custom arguments to acr az build
+    type: string
+    default: ""
+
+steps:
+  - task: AzureCLI@1
+    name: "${{ parameters.taskname }}"
+    displayName: Build and Push ${{ parameters.repository }}
+    inputs:
+      azureSubscription: $(AZURE_SUBSCRIPTION)
+      scriptLocation: inlineScript
+      inlineScript: |
+        set -euxo pipefail  # fail on error
+
+        # Generate an tag with a reproducible checksum of all files in $containerReferences by doing a checksum of all files
+        # in alphabetical order, then another checksum of their names and checksums.
+        # Running this command on windows-based infrastructure may return a different result due to CRLF
+        pushd ${{ parameters.sourceLocation }}
+        imageTag=$(git log -n 1 --format="%H" -- ${{ parameters.containerReferences }})
+        popd
+
+        # If the image with the generated tag doesn't already exist, build it.
+        if ! az acr repository show -n ${{ parameters.acr }} --image "${{ parameters.repository }}:$imageTag" -o table; then
+          echo No match found. Container will be built.
+          echo Tag for new container: $imageTag
+          az acr build \
+            -r ${{ parameters.acr }} \
+            -t "${{ parameters.repository }}:$imageTag" \
+            -t "${{ parameters.repository }}:latest" \
+            -f "${{ parameters.sourceLocation }}/${{ parameters.dockerFile }}" \
+            ${{ parameters.customArguments }} \
+            ${{ parameters.sourceLocation }}
+        else
+          echo "The existing image with tag "$imageTag" is found."
+        fi
+        set +x
+        echo "setting IMAGE_TAG output for task ${{ parameters.taskname }}"
+        echo "##vso[task.setvariable variable=IMAGE_TAG;isOutput=true]$imageTag"
+
+        # write a file containing the image tag
+        mkdir -p $(Pipeline.Workspace)/image_tags
+        echo "$imageTag" > $(Pipeline.Workspace)/image_tags/${{ parameters.taskname }}

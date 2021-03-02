@@ -1,0 +1,4 @@
+[flake8]
+ignore =
+    # Lines >=80 chars
+    E501

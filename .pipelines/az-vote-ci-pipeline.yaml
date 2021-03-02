@@ -1,0 +1,46 @@
+# Pipeline definition that runs CI automatically for the master branch.
+pr: none
+trigger:
+  branches:
+    include:
+      - master
+variables:
+  - group: az-vote-app-dev
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: "Build_Push_Azure_Vote_App_Image"
+    displayName: "Build and Push Azure Vote App Image"
+    jobs:
+      - job: "Code_Quality_Check"
+        displayName: "Code Quality Check"
+        steps:
+          - template: code-quality-template.yaml
+      - job: "Build_Push_Vote_App_Image"
+        displayName: "Build Push Vote-App Image"
+        steps:
+          - template: build-container-template.yaml
+            parameters:
+              sourceLocation: $(SRC_FOLDER)/src/azure-vote-front
+              dockerFile: "Dockerfile"
+              acr: $(AZ_ACR_NAME)
+              repository: azvote/azure-vote-front
+              taskname: "frontend_image"
+          - template: build-container-template.yaml
+            parameters:
+              sourceLocation: $(SRC_FOLDER)/src/azure-vote-back
+              dockerFile: "Dockerfile"
+              acr: $(AZ_ACR_NAME)
+              repository: azvote/azure-vote-back
+              taskname: "backend_image"
+          - publish: $(Pipeline.Workspace)/image_tags
+            artifact: image_tags
+            displayName: "Publish Image Tags"
+          - publish: $(SRC_FOLDER)/manifests
+            artifact: manifests
+            displayName: "Publish Manifests Templates"
+          - publish: utils
+            artifact: utils
+            displayName: "Publish utils"

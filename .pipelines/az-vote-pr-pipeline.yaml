@@ -1,0 +1,16 @@
+# Pipeline to run basic code quality tests as part of pull requests to the master branch.
+
+trigger: none
+pr:
+  branches:
+    include:
+      - master
+
+variables:
+  - group: az-vote-app-dev
+
+pool:
+  vmImage: "ubuntu-latest"
+
+steps:
+  - template: code-quality-template.yaml
