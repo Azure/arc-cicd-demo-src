@@ -43,6 +43,8 @@ steps:
     inputs:
       targetType: "inline"
       script: "
+        shopt -s globstar
+
         docker run --rm --name hl --volume $(pwd):/src --workdir /src
         hadolint/hadolint:v1.19.0
         hadolint --format=json **/Dockerfile > hadolint-testresults.json
@@ -82,6 +84,8 @@ steps:
     inputs:
       targetType: "inline"
       script: "
+        shopt -s globstar
+
         docker run --rm --name mdl --volume $(pwd):/src --workdir /src
         pipelinecomponents/markdownlint:0.6.1
         mdl --json **/*.md > markdownlint-testresults.json
@@ -125,8 +129,6 @@ steps:
         cytopia/yamllint:1.23
         --format parsable . > yamllint-testresults.json
 
-        cat yamllint-testresults.json
-
         exit 0
         "
       failOnStderr: false
@@ -164,9 +166,10 @@ steps:
       script: "
         docker run --rm --name k8sl --volume $(pwd):/src --workdir /src
         zegl/kube-score:v1.10.0
-        score --output-format json clusters-config-templates/argocd/notifications/* > kubescore-testresults.json
-
-        cat kubescore-testresults.json
+          score --output-format json
+            azure-vote/manifests/azure-vote/helm/Chart.yaml
+            azure-vote/manifests/azure-vote/kustomize/base/kustomization.yaml
+        > kubescore-testresults.json
 
         exit 0
         "

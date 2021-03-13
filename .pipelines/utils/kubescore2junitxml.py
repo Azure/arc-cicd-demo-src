@@ -9,6 +9,8 @@ raw_input = sys.stdin.read()
 if len(raw_input) == 0:
     exit(0)
 input = json.loads(raw_input)
+if not input:
+    exit(0)
 
 test_cases = []
 
