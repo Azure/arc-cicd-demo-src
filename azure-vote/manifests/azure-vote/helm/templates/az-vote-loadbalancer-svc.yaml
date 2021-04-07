@@ -3,8 +3,8 @@ kind: Service
 metadata:
   name: azure-vote-front
 spec:
-  type: { { .Values.serviceType } }
+  type: {{ .Values.serviceType}}
   ports:
-    - port: 80
+  - port: 80
   selector:
     app: azure-vote-front

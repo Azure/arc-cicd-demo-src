@@ -9,9 +9,9 @@ spec:
   - http:
       paths:
       - backend:
-        service:
-          name: azure-vote-front
-          port:
-            number: 80
+          service:
+            name: azure-vote-front
+            port:
+              number: 80
         path: {{  .Values.demoAppUrl}}(/|$)(.*)
         pathType: Prefix
