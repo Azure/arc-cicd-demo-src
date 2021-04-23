@@ -1,4 +1,4 @@
-# CI/CD using GitOps with Azure Arc-enabled Kubenetes
+# CI/CD using GitOps with Azure Arc-enabled Kubernetes Cluster
 
 This repo contains the sample code for the Azure Arc GitOps CI/CD tutorial.
 
