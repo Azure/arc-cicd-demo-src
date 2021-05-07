@@ -8,6 +8,11 @@ resources:
       trigger:
         branches:
           - master
+  repositories:
+    - repository: Manifest
+      type: git # Set to 'github' for a GitHub repository 
+      name: azure-vote-app-deployment
+      ref: 'refs/heads/dev'
 
 name: $(Date:yyyyMMdd)$(Rev:.r)
 
