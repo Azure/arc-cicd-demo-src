@@ -19,18 +19,6 @@ variables:
     value: $(Pipeline.Workspace)/az-vote-ci/manifests
   - name: utils_artifact_path
     value: $(Pipeline.Workspace)/az-vote-ci/utils
-  - name: REPO_URL 
-    value: https://csedevops@dev.azure.com/csedevops/GitOps/_git/azure-vote-app-deployment
-  - name: OrganizationName
-    value: csedevops
-  - name: MANIFEST_DIR
-    value: $(System.DefaultWorkingDirectory)/azure-vote-app-deployment
-  - name: DEPLOY_BRANCH_NAME
-    value: deploy/$(Build.BuildNumber)/$(MANIFESTS_BRANCH)
-  - name: PROJECT_NAME
-    value: GitOps
-  - name: REPO_NAME
-    value: azure-vote-app-deployment
 
 pool:
   vmImage: ubuntu-latest
