@@ -11,8 +11,8 @@ resources:
   repositories:
     - repository: Manifest
       type: git # Set to 'github' for a GitHub repository 
-      name: azure-vote-app-deployment
-      ref: 'refs/heads/dev'
+      name: arc-cicd-demo-gitops # Set to name of GitOps repository
+      ref: 'refs/heads/master'
 
 name: $(Date:yyyyMMdd)$(Rev:.r)
 
