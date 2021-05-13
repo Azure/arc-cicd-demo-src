@@ -8,15 +8,4 @@ steps:
       targetType: "inline"
       script: |
         for file in $(images_artifact_path)/*; do echo "##vso[task.setvariable variable=${file##*/}]$(cat $file)"; done
-  - task: Bash@3
-    name: "Generate_Manifests"
-    displayName: "Generate Manifests"
-    inputs:
-      filePath: $(utils_artifact_path)/generate-manifests.sh
-      arguments: "$(manifests_artifact_path) $(Pipeline.Workspace)/gen_manifests"
-  - task: Bash@3
-    name: "Create_PR"
-    displayName: "Create PR"
-    inputs:
-      filePath: $(utils_artifact_path)/create-pr.sh
-      arguments: "-s $(Pipeline.Workspace)/gen_manifests -d . -r $(MANIFESTS_REPO) -b $(MANIFESTS_BRANCH) -i $(Build.BuildNumber) -t $(PAT) -e $(ENVIRONMENT_NAME)"
+  - template: genmanifest-createpr-template.yaml 

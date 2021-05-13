@@ -1,0 +1,45 @@
+parameters:
+  - name: DEPLOY_BRANCH_NAME
+    default: deploy/$(Build.BuildNumber)/$(MANIFESTS_BRANCH)
+    type: string
+  - name: MANIFEST_DIR
+    default: $(System.DefaultWorkingDirectory)/$(MANIFESTS_REPO)
+    type: string
+
+steps:
+- checkout: self
+- checkout: Manifest
+  persistCredentials: true
+
+- task: Bash@3        
+  name: "Generate_Manifests"
+  displayName: "Generate Manifests"
+  inputs:
+    filePath: $(utils_artifact_path)/generate-manifests.sh
+    arguments: '$(manifests_artifact_path) gen_manifests'
+
+- script: git config --global user.email $PR_USER_EMAIL & git config --global user.name $PR_USER_NAME
+  displayName: Configure Git
+  env:
+    PR_USER_NAME: "Git Ops"
+    PR_USER_EMAIL: "agent@gitops.com"
+  workingDirectory: ${{ parameters.MANIFEST_DIR }}
+
+- script: |
+   echo "Create a new branch ${{ parameters.DEPLOY_BRANCH_NAME }}"   
+   git checkout -b ${{ parameters.DEPLOY_BRANCH_NAME }}
+   mkdir -p $(MANIFESTS_FOLDER)
+   cp -r $(Build.SourcesDirectory)/gen_manifests/* $(MANIFESTS_FOLDER)/
+   git add -A
+   git commit -m "deployment $(Build.BuildNumber)"
+   git push --set-upstream origin ${{ parameters.DEPLOY_BRANCH_NAME }}
+  displayName: Add Generated Manifest to New Branch
+  workingDirectory: ${{ parameters.MANIFEST_DIR }}
+
+- script: |
+   echo $(System.AccessToken) | az devops login
+   az devops configure --defaults organization=https://dev.azure.com/$(ORGANIZATION_NAME) project="$(PROJECT_NAME)" --use-git-aliases true
+   az repos pr create --project $(PROJECT_NAME) --repository $(MANIFESTS_REPO) --target-branch $(MANIFESTS_BRANCH) --source-branch ${{ parameters.DEPLOY_BRANCH_NAME }} --title "deployment $(Build.BuildNumber)" --auto-complete --squash
+  env:
+    AZURE_DEVOPS_CLI_PAT: $(System.AccessToken)
+  displayName: Create Pull Request   
