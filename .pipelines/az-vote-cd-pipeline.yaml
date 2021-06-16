@@ -8,11 +8,6 @@ resources:
       trigger:
         branches:
           - master
-  repositories:
-    - repository: Manifest
-      type: git # Set to 'github' for a GitHub repository 
-      name: arc-cicd-demo-gitops # Set to name of GitOps repository
-      ref: 'refs/heads/master'
 
 name: $(Date:yyyyMMdd)$(Rev:.r)
 

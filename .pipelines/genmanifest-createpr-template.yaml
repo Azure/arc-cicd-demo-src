@@ -8,7 +8,7 @@ parameters:
 
 steps:
 - checkout: self
-- checkout: Manifest
+- checkout: git://$(System.TeamProject)/$(MANIFESTS_REPO)
   persistCredentials: true
 
 - task: Bash@3        
