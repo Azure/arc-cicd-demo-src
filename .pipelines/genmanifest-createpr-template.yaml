@@ -3,12 +3,12 @@ parameters:
     default: deploy/$(Build.BuildNumber)/$(MANIFESTS_BRANCH)
     type: string
   - name: MANIFEST_DIR
-    default: $(System.DefaultWorkingDirectory)/arc-cicd-demo-gitops
+    default: $(System.DefaultWorkingDirectory)/$(MANIFEST_REPO)
     type: string
 
 steps:
 - checkout: self
-- checkout: Manifest
+- checkout: git://$(System.TeamProject)/$(MANIFESTS_REPO)
   persistCredentials: true
 
 - task: Bash@3        
@@ -39,7 +39,7 @@ steps:
 - script: |
    echo $(System.AccessToken) | az devops login
    az devops configure --defaults organization=https://dev.azure.com/$(ORGANIZATION_NAME) project="$(PROJECT_NAME)" --use-git-aliases true
-   az repos pr create --project $(PROJECT_NAME) --repository arc-cicd-demo-gitops --target-branch $(MANIFESTS_BRANCH) --source-branch ${{ parameters.DEPLOY_BRANCH_NAME }} --title "deployment $(Build.BuildNumber)" --auto-complete --squash
+   az repos pr create --project $(PROJECT_NAME) --repository $(MANIFESTS_REPO) --target-branch $(MANIFESTS_BRANCH) --source-branch ${{ parameters.DEPLOY_BRANCH_NAME }} --title "deployment $(Build.BuildNumber)" --auto-complete --squash
   env:
     AZURE_DEVOPS_CLI_PAT: $(System.AccessToken)
   displayName: Create Pull Request   
