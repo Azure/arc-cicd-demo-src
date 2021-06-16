@@ -3,7 +3,7 @@ parameters:
     default: deploy/$(Build.BuildNumber)/$(MANIFESTS_BRANCH)
     type: string
   - name: MANIFEST_DIR
-    default: $(System.DefaultWorkingDirectory)/$(MANIFEST_REPO)
+    default: $(System.DefaultWorkingDirectory)/$(MANIFESTS_REPO)
     type: string
 
 steps:
