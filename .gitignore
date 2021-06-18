@@ -99,3 +99,10 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+
+# Ignore DevSpace cache and log folder
+.devspace/
+
+# Ignore generated manifest
+manifests.yaml
