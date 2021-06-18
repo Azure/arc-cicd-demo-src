@@ -1,0 +1,70 @@
+version: v1beta10
+
+# `vars` specifies variables which may be used as  in devspace.yaml
+vars:
+- name: REGISTRY_PASSWORD
+  password: true
+pullSecrets:
+- registry: ${REGISTRY_NAME}.azurecr.io
+  username: ${REGISTRY_USERNAME}
+  password: ${REGISTRY_PASSWORD}
+
+# `images` specifies all images that may need to be built for this project
+images:
+  frontend: # This image is called `frontend` and this name `frontend` is referenced multiple times in the config below
+    image: ${REGISTRY_NAME}.azurecr.io/azvote/azure-vote-front
+    tags:
+      - v2
+    dockerfile: ./azure-vote/src/azure-vote-front/Dockerfile
+    context: ./azure-vote/src/azure-vote-front/
+    build:
+      disabled: true
+
+  backend: # This image is called `backend` and this name `backend` is referenced multiple times in the config below
+    image: ${REGISTRY_NAME}.azurecr.io/azvote/azure-vote-back
+    tags:
+      - 6.0.8
+    dockerfile: ./azure-vote/src/azure-vote-back/Dockerfile
+    context: ./azure-vote/src/azure-vote-back/
+    build:
+      disabled: true    
+
+
+# `deployments` tells DevSpace how to deploy this project
+deployments:
+- name: azure-vote-front
+  # This deployment uses `kubectl` but you can also define `helm` deployments
+  kubectl:
+    kustomize: true    
+    manifests:
+      - ./azure-vote/manifests/azure-vote/kustomize/base
+    
+
+# `dev` only applies when you run `devspace dev`
+dev:
+  #`dev.sync` configures a file sync between our Pods in k8s and your local project files
+  sync:
+  - imageName: frontend # Select the Pod that runs our `frontend` image
+    localSubPath: ./azure-vote/src/azure-vote-front/
+    containerPath: /app
+
+  ports:
+  - imageName: frontend
+    forward:
+    - port: 8085
+      remotePort: 80
+      
+  open:
+    - url: http://localhost:8085/
+
+
+# Run `devspace run gen-manifest` to generate manifest for azure-vote-front and azure-vote-back. Generated manifest will be ignored by git.
+commands:
+- name: gen-manifest
+  command: "./utils/generate-manifests-dev.sh ./azure-vote/manifests"
+
+hooks:
+- command: "./utils/generate-manifests-dev.sh ./azure-vote/manifests"
+  when:
+    before:
+      deployments: all  
