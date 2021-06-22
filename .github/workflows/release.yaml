@@ -4,10 +4,6 @@ on:
   release:
     types: 
       - created
-  push:
-    branches:
-      - eedorenko/branching-strategy
-
 
 jobs:
   release:
@@ -20,8 +16,7 @@ jobs:
 
     - name: Get Release Number
       run: |
-        # tag_number=$GITHUB_REF
-        tag_number=refs/tags/v1.0.x
+        tag_number=$GITHUB_REF
 
         # v1.0.0 -> 1-0-x
         echo "RELEASE_NUMBER=$(echo $tag_number | awk -F"." '{print $1"-"$2"-x"}' | cut -c12-)" >> $GITHUB_ENV
@@ -33,65 +28,65 @@ jobs:
         echo $RELEASE_NUMBER
         echo $VERSION_NUMBER
         ./utils/subbranch.sh main release/$RELEASE_NUMBER
-        
 
-    # - name: Checkout Manifests
-    #   uses: actions/checkout@v2
-    #   with: 
-    #     repository: ${{ github.repository_owner }}/${{ secrets.MANIFESTS_REPO_NAME }}
-    #     path: manifests
-    #     token: ${{ secrets.PAT }}
-    #     fetch-depth: 0
 
-    # - name: Sub-branch Dev 
-    #   run: |        
-    #     ./../utils/subbranch.sh dev release/$RELEASE_NUMBER/dev
-    #   working-directory: manifests
+    - name: Checkout Manifests
+      uses: actions/checkout@v2
+      with: 
+        repository: ${{ github.repository_owner }}/${{ secrets.MANIFESTS_REPO_NAME }}
+        path: manifests
+        token: ${{ secrets.PAT }}
+        fetch-depth: 0
 
-    # - name: Sub-branch Stage 
-    #   run: |
-    #     ./../utils/subbranch.sh stage release/$RELEASE_NUMBER/stage
-    #   working-directory: manifests
+    - name: Sub-branch Dev 
+      run: |        
+        ./../utils/subbranch.sh dev release/$RELEASE_NUMBER/dev
+      working-directory: manifests
 
-    # - name: Checkout Fleet
-    #   uses: actions/checkout@v2
-    #   with: 
-    #     repository: ${{ github.repository_owner }}/${{ secrets.FLEET_REPO_NAME }}
-    #     path: fleet
-    #     token: ${{ secrets.PAT }}
-    #     fetch-depth: 0
+    - name: Sub-branch Stage 
+      run: |
+        ./../utils/subbranch.sh stage release/$RELEASE_NUMBER/stage
+      working-directory: manifests
 
-    # - name: Setup Flux 
-    #   run: |        
-    #     curl -s https://fluxcd.io/install.sh | sudo bash
+    - name: Checkout Fleet
+      uses: actions/checkout@v2
+      with: 
+        repository: ${{ github.repository_owner }}/${{ secrets.FLEET_REPO_NAME }}
+        path: fleet
+        token: ${{ secrets.PAT }}
+        fetch-depth: 0
 
-    # - name: Add release to fleet in Dev 
-    #   run: |        
-    #     ./../utils/add-release-to-fleet.sh dev ${{ github.repository_owner }} $RELEASE_NUMBER ${{ secrets.MANIFESTS_REPO}} release/$RELEASE_NUMBER/dev
-    #   working-directory: fleet
+    - name: Setup Flux 
+      run: |        
+        curl -s https://fluxcd.io/install.sh | sudo bash
+
+    - name: Add release to fleet in Dev 
+      run: |        
+        ./../utils/add-release-to-fleet.sh dev ${{ github.repository_owner }} $RELEASE_NUMBER ${{ secrets.MANIFESTS_REPO}} release/$RELEASE_NUMBER/dev
+      working-directory: fleet
     
-    # - name: Create Pull Request to Dev fleet
-    #   uses: peter-evans/create-pull-request@v3
-    #   with: 
-    #     path: fleet
-    #     token: ${{ secrets.PAT }}
-    #     commit-message: add release ${{ env.RELEASE_NUMBER }} manifests for ${{ github.repository_owner }} to dev
-    #     title: add release ${{ env.RELEASE_NUMBER }} manifests for ${{ github.repository_owner }} to dev
-    #     branch: ${{ github.repository_owner }}/${{ env.RELEASE_NUMBER }}-dev
+    - name: Create Pull Request to Dev fleet
+      uses: peter-evans/create-pull-request@v3
+      with: 
+        path: fleet
+        token: ${{ secrets.PAT }}
+        commit-message: add release ${{ env.RELEASE_NUMBER }} manifests for ${{ github.repository_owner }} to dev
+        title: add release ${{ env.RELEASE_NUMBER }} manifests for ${{ github.repository_owner }} to dev
+        branch: ${{ github.repository_owner }}/${{ env.RELEASE_NUMBER }}-dev
 
-    # - name: Add release to fleet in Stage 
-    #   run: |        
-    #     ./../utils/add-release-to-fleet.sh stage ${{ github.repository_owner }} $RELEASE_NUMBER ${{ secrets.MANIFESTS_REPO}} release/$RELEASE_NUMBER/stage
-    #   working-directory: fleet
+    - name: Add release to fleet in Stage 
+      run: |        
+        ./../utils/add-release-to-fleet.sh stage ${{ github.repository_owner }} $RELEASE_NUMBER ${{ secrets.MANIFESTS_REPO}} release/$RELEASE_NUMBER/stage
+      working-directory: fleet
     
-    # - name: Create Pull Request to Stage fleet
-    #   uses: peter-evans/create-pull-request@v3
-    #   with: 
-    #     path: fleet
-    #     token: ${{ secrets.PAT }}
-    #     commit-message: add release ${{ env.RELEASE_NUMBER }} manifests for ${{ github.repository_owner }} to stage
-    #     title: add release ${{ env.RELEASE_NUMBER }} manifests for ${{ github.repository_owner }} to stage
-    #     branch: ${{ github.repository_owner }}/${{ env.RELEASE_NUMBER }}-stage
+    - name: Create Pull Request to Stage fleet
+      uses: peter-evans/create-pull-request@v3
+      with: 
+        path: fleet
+        token: ${{ secrets.PAT }}
+        commit-message: add release ${{ env.RELEASE_NUMBER }} manifests for ${{ github.repository_owner }} to stage
+        title: add release ${{ env.RELEASE_NUMBER }} manifests for ${{ github.repository_owner }} to stage
+        branch: ${{ github.repository_owner }}/${{ env.RELEASE_NUMBER }}-stage
 
     - name: Generate Helm Charts
       run: |
