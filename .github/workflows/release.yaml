@@ -33,6 +33,7 @@ jobs:
         echo $RELEASE_NUMBER
         echo $VERSION_NUMBER
         ./utils/subbranch.sh main release/$RELEASE_NUMBER
+        
 
     # - name: Checkout Manifests
     #   uses: actions/checkout@v2
