@@ -1,0 +1,12 @@
+steps:  
+  - task: InvokeRESTAPI@1
+    displayName: "Wait for deployment completion"
+    inputs:
+      connectionType: connectedServiceName
+      serviceConnection: azdo-pr-connection
+      method: 'PATCH'
+      urlSuffix: '/pullRequests/$(pr_num)/properties?api-version=6.0-preview.1'
+      headers: '{"Content-Type":"application/json-patch+json", "Authorization": "Bearer $(System.AccessToken)"}'
+      body: '[{"op":"add","path":"/callback-task-id","from":null,"value":"{\"taskid\":\"$(System.TaskInstanceId)\", \"jobid\":\"$(System.JobId)\", \"planurl\":\"$(System.CollectionUri)\",  \"planid\":\"$(System.PlanId)\", \"projectid\":\"$(System.TeamProjectId)\", \"pr_num\":\"$(pr_num)\"}"}]'
+      waitForCompletion: 'true'
+      completionEvent: 'Callback'

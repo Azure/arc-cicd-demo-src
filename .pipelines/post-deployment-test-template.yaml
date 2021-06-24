@@ -1,0 +1,7 @@
+steps:
+  - task: Bash@3        
+    name: "smoke_test"
+    displayName: "Smoke Test"
+    inputs:
+      filePath: utils/smoke-test.sh
+      arguments: '$(CLUSTER_ENTRY_URL)$(DEMO_APP_URL)'
