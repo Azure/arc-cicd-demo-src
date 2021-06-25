@@ -7,9 +7,9 @@ parameters:
     type: string
 
 steps:
-- checkout: self
-# - checkout: git://$(System.TeamProject)/$(MANIFESTS_REPO)
-#   persistCredentials: true
+# - checkout: self
+- checkout: git://$(System.TeamProject)/$(MANIFESTS_REPO)
+  persistCredentials: true
 
 - task: Bash@3        
   name: "Generate_Manifests"
