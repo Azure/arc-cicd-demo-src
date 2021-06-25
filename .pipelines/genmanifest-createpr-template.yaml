@@ -33,15 +33,19 @@ steps:
    mkdir -p $(MANIFESTS_FOLDER)
    cp -r $(Build.SourcesDirectory)/gen_manifests/* $(MANIFESTS_FOLDER)/
    git add -A
-   git commit -m "deployment $(Build.BuildNumber)"
-   git push --set-upstream origin ${{ parameters.DEPLOY_BRANCH_NAME }}
+   echo "##vso[task.setvariable variable=GIT_STATUS]$(git status --porcelain | head -1)"   
   displayName: Add Generated Manifest to New Branch
   workingDirectory: ${{ parameters.MANIFEST_DIR }}
 
 - script: |
+   git commit -m "deployment $(Build.BuildNumber)"
+   git push --set-upstream origin ${{ parameters.DEPLOY_BRANCH_NAME }}
    echo $(System.AccessToken) | az devops login
    az devops configure --defaults organization=https://dev.azure.com/$(ORGANIZATION_NAME) project="$(PROJECT_NAME)" --use-git-aliases true
-   az repos pr create --project $(PROJECT_NAME) --repository $(MANIFESTS_REPO) --target-branch $(MANIFESTS_BRANCH) --source-branch ${{ parameters.DEPLOY_BRANCH_NAME }} --title "deployment $(Build.BuildNumber)" --auto-complete --squash
+   pr_response=$(az repos pr create --project $(PROJECT_NAME) --repository $(MANIFESTS_REPO) --target-branch $(MANIFESTS_BRANCH) --source-branch ${{ parameters.DEPLOY_BRANCH_NAME }} --title "deployment $(Build.BuildNumber)" --squash -o "{\"taskid\":\"$(System.TaskInstanceId)\", \"jobid\":\"$(System.JobId)\", \"planurl\":\"$(System.CollectionUri)\",  \"planid\":\"$(System.PlanId)\", \"projectid\":\"$(System.TeamProjectId)\", \"pr_num\":\"$(pr_num)\"}"
+   export pr_num=$(echo $pr_response | jq '.pullRequestId')
+   echo "##vso[task.setvariable variable=PR_NUM;isOutput=true]$pr_num"
   env:
     AZURE_DEVOPS_CLI_PAT: $(System.AccessToken)
   displayName: Create Pull Request   
+  condition: ne(variables['GIT_STATUS'], '')
