@@ -49,3 +49,4 @@ steps:
     AZURE_DEVOPS_CLI_PAT: $(System.AccessToken)
   displayName: Create Pull Request   
   condition: ne(variables['GIT_STATUS'], '')
+  workingDirectory: ${{ parameters.MANIFEST_DIR }}
