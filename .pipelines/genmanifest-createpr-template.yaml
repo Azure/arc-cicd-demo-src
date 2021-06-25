@@ -43,6 +43,7 @@ steps:
    echo $(System.AccessToken) | az devops login
    az devops configure --defaults organization=$(System.CollectionUri) project=$(System.TeamProject) --use-git-aliases true
    pr_response=$(az repos pr create --project $(System.TeamProject) --repository $(MANIFESTS_REPO) --target-branch $(MANIFESTS_BRANCH) --source-branch ${{ parameters.DEPLOY_BRANCH_NAME }}  --title "deployment $(Build.BuildNumber)" --squash -o json)
+   echo $pr_response
    export pr_num=$(echo $pr_response | jq '.pullRequestId')
    echo "##vso[task.setvariable variable=PR_NUM;isOutput=true]$pr_num"
   env:
