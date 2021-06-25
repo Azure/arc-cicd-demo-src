@@ -61,32 +61,32 @@ stages:
         - template: post-deployment-test-template.yaml
 
 
-  - stage: "deploy_stage"
-    displayName: "Deploy to Stage"
-    variables:
-      - group: az-vote-app-stage
-    jobs:
-      - deployment: Deploy_to_stage
-        displayName: "Deploy to Stage"
-        environment: stage
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - template: deployment-template.yaml
+  # - stage: "deploy_stage"
+  #   displayName: "Deploy to Stage"
+  #   variables:
+  #     - group: az-vote-app-stage
+  #   jobs:
+  #     - deployment: Deploy_to_stage
+  #       displayName: "Deploy to Stage"
+  #       environment: stage
+  #       strategy:
+  #         runOnce:
+  #           deploy:
+  #             steps:
+  #               - template: deployment-template.yaml
 
-      - job: deploy_with_gitops
-        dependsOn: Deploy_to_stage
-        displayName: Wait for changes to be applied
-        pool: server          
-        variables:
-          pr_num: $[ dependencies.Deploy_to_stage.outputs['Deploy_to_stage.Create_PR.PR_NUM'] ]
-        condition: ne(variables['pr_num'],'')        
-        steps:   
-        - template: pr-completion-task-template.yaml  
+  #     - job: deploy_with_gitops
+  #       dependsOn: Deploy_to_stage
+  #       displayName: Wait for changes to be applied
+  #       pool: server          
+  #       variables:
+  #         pr_num: $[ dependencies.Deploy_to_stage.outputs['Deploy_to_stage.Create_PR.PR_NUM'] ]
+  #       condition: ne(variables['pr_num'],'')        
+  #       steps:   
+  #       - template: pr-completion-task-template.yaml  
 
-      - job: "Automated_testing"
-        displayName: Automated testing 
-        dependsOn: deploy_with_gitops
-        steps:
-        - template: post-deployment-test-template.yaml
+  #     - job: "Automated_testing"
+  #       displayName: Automated testing 
+  #       dependsOn: deploy_with_gitops
+  #       steps:
+  #       - template: post-deployment-test-template.yaml
