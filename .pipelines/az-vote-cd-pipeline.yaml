@@ -10,11 +10,6 @@ resources:
         # Until Flux V2 integration is in Public Preview, work with FluxV2 branch.
         # Once Flux V2 integration is in Public Preview, FluxV2 branch will be merged into the default branch.
           - FluxV2
-  repositories:
-    - repository: Manifest
-      type: git
-      name: arc-cicd-demo-gitops
-      ref: 'refs/heads/dev'
 
 
 name: $(Date:yyyyMMdd)$(Rev:.r)
