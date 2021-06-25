@@ -10,13 +10,6 @@ resources:
         # Until Flux V2 integration is in Public Preview, work with FluxV2 branch.
         # Once Flux V2 integration is in Public Preview, FluxV2 branch will be merged into the default branch.
           - FluxV2
-  repositories:
-    - repository: Manifest
-      type: git
-      name: arc-cicd-demo-gitops
-      ref: 'refs/heads/dev'
-
-
 
 name: $(Date:yyyyMMdd)$(Rev:.r)
 
@@ -45,49 +38,49 @@ stages:
               steps:
                 - template: deployment-template.yaml
     
-      # - job: deploy_with_gitops
-      #   dependsOn: Deploy_to_dev
-      #   displayName: Wait for changes to be applied
-      #   pool: server          
-      #   variables:
-      #     pr_num: $[ dependencies.Deploy_to_dev.outputs['Deploy_to_dev.Create_PR.PR_NUM'] ]
-      #   condition: ne(variables['pr_num'],'')
-      #   steps:   
-      #   - template: pr-completion-task-template.yaml                 
+      - job: deploy_with_gitops
+        dependsOn: Deploy_to_dev
+        displayName: Wait for changes to be applied
+        pool: server          
+        variables:
+          pr_num: $[ dependencies.Deploy_to_dev.outputs['Deploy_to_dev.Create_PR.PR_NUM'] ]
+        condition: ne(variables['pr_num'],'')
+        steps:   
+        - template: pr-completion-task-template.yaml                 
 
-      # - job: "Automated_testing"
-      #   displayName: Automated testing 
-      #   dependsOn: deploy_with_gitops
-      #   steps:
-      #   - template: post-deployment-test-template.yaml
+      - job: "Automated_testing"
+        displayName: Automated testing 
+        dependsOn: deploy_with_gitops
+        steps:
+        - template: post-deployment-test-template.yaml
 
 
-  # - stage: "deploy_stage"
-  #   displayName: "Deploy to Stage"
-  #   variables:
-  #     - group: az-vote-app-stage
-  #   jobs:
-  #     - deployment: Deploy_to_stage
-  #       displayName: "Deploy to Stage"
-  #       environment: stage
-  #       strategy:
-  #         runOnce:
-  #           deploy:
-  #             steps:
-  #               - template: deployment-template.yaml
+  - stage: "deploy_stage"
+    displayName: "Deploy to Stage"
+    variables:
+      - group: az-vote-app-stage
+    jobs:
+      - deployment: Deploy_to_stage
+        displayName: "Deploy to Stage"
+        environment: stage
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - template: deployment-template.yaml
 
-  #     - job: deploy_with_gitops
-  #       dependsOn: Deploy_to_stage
-  #       displayName: Wait for changes to be applied
-  #       pool: server          
-  #       variables:
-  #         pr_num: $[ dependencies.Deploy_to_stage.outputs['Deploy_to_stage.Create_PR.PR_NUM'] ]
-  #       condition: ne(variables['pr_num'],'')        
-  #       steps:   
-  #       - template: pr-completion-task-template.yaml  
+      - job: deploy_with_gitops
+        dependsOn: Deploy_to_stage
+        displayName: Wait for changes to be applied
+        pool: server          
+        variables:
+          pr_num: $[ dependencies.Deploy_to_stage.outputs['Deploy_to_stage.Create_PR.PR_NUM'] ]
+        condition: ne(variables['pr_num'],'')        
+        steps:   
+        - template: pr-completion-task-template.yaml  
 
-  #     - job: "Automated_testing"
-  #       displayName: Automated testing 
-  #       dependsOn: deploy_with_gitops
-  #       steps:
-  #       - template: post-deployment-test-template.yaml
+      - job: "Automated_testing"
+        displayName: Automated testing 
+        dependsOn: deploy_with_gitops
+        steps:
+        - template: post-deployment-test-template.yaml
