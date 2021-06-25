@@ -12,8 +12,8 @@ resources:
           - FluxV2
   repositories:
     - repository: Manifest
-      type: git # Set to 'github' for a GitHub repository 
-      name: $(MANIFESTS_REPO)
+      type: git
+      name: arc-cicd-demo-gitops
 
 name: $(Date:yyyyMMdd)$(Rev:.r)
 
