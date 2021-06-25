@@ -54,11 +54,11 @@ stages:
         steps:   
         - template: pr-completion-task-template.yaml                 
 
-      - job: "Automated_testing"
-        displayName: Automated testing 
-        dependsOn: deploy_with_gitops
-        steps:
-        - template: post-deployment-test-template.yaml
+      # - job: "Automated_testing"
+      #   displayName: Automated testing 
+      #   dependsOn: deploy_with_gitops
+      #   steps:
+      #   - template: post-deployment-test-template.yaml
 
 
   # - stage: "deploy_stage"
