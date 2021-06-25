@@ -44,15 +44,15 @@ stages:
               steps:
                 - template: deployment-template.yaml
     
-      - job: deploy_with_gitops
-        dependsOn: Deploy_to_dev
-        displayName: Wait for changes to be applied
-        pool: server          
-        variables:
-          pr_num: $[ dependencies.Deploy_to_dev.outputs['Deploy_to_dev.Create_PR.PR_NUM'] ]
-        condition: ne(variables['pr_num'],'')
-        steps:   
-        - template: pr-completion-task-template.yaml                 
+      # - job: deploy_with_gitops
+      #   dependsOn: Deploy_to_dev
+      #   displayName: Wait for changes to be applied
+      #   pool: server          
+      #   variables:
+      #     pr_num: $[ dependencies.Deploy_to_dev.outputs['Deploy_to_dev.Create_PR.PR_NUM'] ]
+      #   condition: ne(variables['pr_num'],'')
+      #   steps:   
+      #   - template: pr-completion-task-template.yaml                 
 
       # - job: "Automated_testing"
       #   displayName: Automated testing 
