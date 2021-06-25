@@ -21,6 +21,7 @@ stages:
         steps:
           - template: code-quality-template.yaml
       - job: "Build_Push_Vote_App_Image"
+        dependsOn: Code_Quality_Check
         displayName: "Build Push Vote-App Image"
         steps:
           - template: build-container-template.yaml
