@@ -7,7 +7,7 @@ parameters:
     type: string
 
 steps:
-# - checkout: self
+- checkout: self
 - checkout: git://$(System.TeamProject)/$(MANIFESTS_REPO)
   persistCredentials: true
 
