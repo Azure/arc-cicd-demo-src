@@ -47,8 +47,7 @@ steps:
    export pr_num=$(echo $pr_response | jq '.pullRequestId')
    echo "pr_num="$pr_num
    echo "##vso[task.setvariable variable=PR_NUM;isOutput=true]$pr_num"
-  env:
-    AZURE_DEVOPS_CLI_PAT: $(System.AccessToken)
   displayName: Create Pull Request   
   condition: ne(variables['GIT_STATUS'], '')
+  name: "Create_PR" 
   workingDirectory: ${{ parameters.MANIFEST_DIR }}
