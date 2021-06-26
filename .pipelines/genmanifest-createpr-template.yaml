@@ -1,6 +1,6 @@
 parameters:
   - name: DEPLOY_BRANCH_NAME
-    default: deploy/$(Build.BuildNumber)/$(MANIFESTS_BRANCH)
+    default: deploy/$(Build.BuildNumber)/$(ENVIRONMENT_NAME)
     type: string
   - name: MANIFEST_DIR
     default: $(System.DefaultWorkingDirectory)/$(MANIFESTS_REPO)
@@ -45,6 +45,7 @@ steps:
    pr_response=$(az repos pr create --project $(System.TeamProject) --repository $(MANIFESTS_REPO) --target-branch $(MANIFESTS_BRANCH) --source-branch ${{ parameters.DEPLOY_BRANCH_NAME }}  --title "deployment $(Build.BuildNumber)" --squash -o json)
    echo $pr_response
    export pr_num=$(echo $pr_response | jq '.pullRequestId')
+   echo "pr_num="$pr_num
    echo "##vso[task.setvariable variable=PR_NUM;isOutput=true]$pr_num"
   env:
     AZURE_DEVOPS_CLI_PAT: $(System.AccessToken)
