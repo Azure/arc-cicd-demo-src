@@ -2,8 +2,6 @@
 
 # Simple smoke test requesting demo app url and failing in case of error response
 
-echo "it's a new one"
-
 set -x
 
 az aks get-credentials --resource-group $AKS_RESOURCE_GROUP --name $AKS_NAME

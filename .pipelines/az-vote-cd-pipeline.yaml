@@ -23,23 +23,13 @@ variables:
     value: $(Pipeline.Workspace)/az-vote-ci/image_tags
   - name: manifests_artifact_path
     value: $(Pipeline.Workspace)/az-vote-ci/manifests
-  # - name: utils_artifact_path
-  #   value: $(Pipeline.Workspace)/az-vote-ci/utils
   - name: utils_artifact_path
-    value: $(Pipeline.Workspace)/cd-utils
-
+    value: $(Pipeline.Workspace)/az-vote-ci/utils
 
 pool:
   vmImage: ubuntu-latest
 
 stages:
-  - stage: "Fetch_the_util_code_temp"
-    jobs: 
-    - job: "publish_artifacts"
-      steps:
-      - publish: $(System.DefaultWorkingDirectory)/utils
-        artifact: cd-utils
-
   - stage: "deploy_dev"
     displayName: "Deploy to Dev"
     jobs:
