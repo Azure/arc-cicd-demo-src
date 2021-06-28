@@ -1,6 +1,8 @@
 steps:
-  - task: Bash@3        
+  - task: AzureCLI@1        
     name: "smoke_test"
     displayName: "Smoke Test"
     inputs:
-      filePath: utils/smoke-test.sh
+      azureSubscription: $(AZURE_SUBSCRIPTION)
+      scriptType: bash
+      scriptLocation: utils/smoke-test.sh
