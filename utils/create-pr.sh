@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-while getopts "s:d:r:b:i:t:e:" option;
+while getopts "s:d:r:b:i:t:e:p:" option;
     do
     case "$option" in
         s ) SOURCE_FOLDER=${OPTARG};;
@@ -12,6 +12,14 @@ while getopts "s:d:r:b:i:t:e:" option;
         e ) ENV_NAME=${OPTARG};;
     esac
 done
+echo "List input params"
+echo $SOURCE_FOLDER
+echo $DEST_FOLDER
+echo $DEST_REPO
+echo $DEST_BRANCH
+echo $DEPLOY_ID
+echo $ENV_NAME
+echo "end of list"
 
 set -euo pipefail  # fail on error
 
@@ -21,12 +29,11 @@ pr_user_email="agent@gitops.com"
 git config --global user.email $pr_user_email
 git config --global user.name $pr_user_name
 
-
 # Clone manifests repo
 echo "Clone manifests repo"
 repo_url="${DEST_REPO#http://}"
 repo_url="${DEST_REPO#https://}"
-repo_url="https://automation:$TOKEN@$repo_url"
+repo_url="https://automated:$TOKEN@$repo_url"
 
 echo "git clone $repo_url -b $DEST_BRANCH --depth 1 --single-branch"
 git clone $repo_url -b $DEST_BRANCH --depth 1 --single-branch
@@ -37,7 +44,7 @@ echo "git status"
 git status
 
 # Create a new branch 
-deploy_branch_name=deploy/$DEPLOY_ID/$ENV_NAME
+deploy_branch_name=deploy/$DEPLOY_ID/$BACKEND_IMAGE/$DEST_BRANCH
 
 echo "Create a new branch $deploy_branch_name"
 git checkout -b $deploy_branch_name
@@ -56,17 +63,11 @@ if [[ `git status --porcelain | head -1` ]]; then
     git push --set-upstream $repo_url $deploy_branch_name
 
     # Create a PR 
-    echo "Create a PR to $DEST_BRANCH" 
-
-    B64_PAT=$(printf ":$TOKEN" | base64)
-    pr_response=$(curl -H "Authorization: Basic $B64_PAT" -H "Content-Type: application/json" --fail \
-            -d '{"sourceRefName":"refs/heads/'$deploy_branch_name'", "targetRefName":"refs/heads/'$DEST_BRANCH'", "description":"Deploy to '$ENV_NAME'", "title":"deployment '$DEPLOY_ID'"}' \
-        "$SYSTEM_COLLECTIONURI$SYSTEM_TEAMPROJECT/_apis/git/repositories/$repo_name/pullrequests?api-version=6.1-preview.1")
-    echo $pr_response
-    export pr_num=$(echo $pr_response | jq '.pullRequestId')
-    echo "##vso[task.setvariable variable=PR_NUM;isOutput=true]$pr_num"
-
-    export pr_url="$SYSTEM_COLLECTIONURI$SYSTEM_TEAMPROJECT/_git/$repo_name/pullrequest/$pr_num"
-    echo "PR successfully created"
-    echo "Please review and merge the PR at $pr_url"
-fi
+    echo "Create a PR to $DEST_BRANCH"
+    
+    owner_repo="${DEST_REPO#https://github.com/}"
+    echo $owner_repo
+    GITHUB_TOKEN=$TOKEN
+    echo $GITHUB_TOKEN | gh auth login --with-token
+    gh pr create --base $DEST_BRANCH --head $deploy_branch_name --title "deployment '$DEPLOY_ID'" --body "Deploy to '$ENV_NAME'"
+fi 
