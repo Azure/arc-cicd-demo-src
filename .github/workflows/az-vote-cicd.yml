@@ -5,7 +5,7 @@ on:
   push:
     branches:
       - master
-      - Fluxv2
+      - FluxV2
       - release/*
 
 
