@@ -65,7 +65,7 @@ jobs:
       uses: actions/upload-artifact@v2.2.2
       with:
         name: manifests
-        path: ${{ github.workspace }}/manifests
+        path: ${{ github.workspace }}/azure-vote/manifests
     - name: Upload Utils
       uses: actions/upload-artifact@v2.2.2
       with:
