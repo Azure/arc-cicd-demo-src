@@ -60,7 +60,7 @@ jobs:
       uses: actions/upload-artifact@v2.2.2
       with:
         name: image_tags
-        path: ${{ github.workspace }}/images
+        path: ${{ github.workspace }}/image_tags
     - name: Upload Manifests Templates
       uses: actions/upload-artifact@v2.2.2
       with:
@@ -83,7 +83,7 @@ jobs:
       uses: actions/download-artifact@v2.0.8
       with:
         name: image_tags
-        path: ${{ github.workspace }}/images
+        path: ${{ github.workspace }}/image_tags
     - name: Download Manifests Templates
       uses: actions/download-artifact@v2.0.8
       with:
@@ -98,7 +98,7 @@ jobs:
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
       run: |
-        for file in ${{ github.workspace }}/images/*; do echo "::set-env name=${file##*/}::$(cat $file)"; done 
+        for file in ${{ github.workspace }}/image_tags/*; do echo "::set-env name=${file##*/}::$(cat $file)"; done 
     - name: Generate Manifests
       run: |
         ${{ github.workspace }}/utils/generate-manifests.sh manifests gen_manifests
