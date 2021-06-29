@@ -31,8 +31,8 @@ jobs:
       uses: Azure/cli@1.0.4
       with:
         inlineScript:  |
-          chmod +x $GITHUB_WORKSPACE/code/buildContainerTemplate.sh
-          $GITHUB_WORKSPACE/code/buildContainerTemplate.sh -f $SRC_FOLDER \
+          chmod +x $GITHUB_WORKSPACE/utils/buildContainerTemplate.sh
+          $GITHUB_WORKSPACE/utils/buildContainerTemplate.sh -f $SRC_FOLDER \
                                                            -g $GITHUB_WORKSPACE \
                                                            -s $SOURCE_LOCATION \
                                                            -u $AZ_ACR_NAME \
@@ -48,8 +48,8 @@ jobs:
       uses: Azure/cli@1.0.4
       with:
         inlineScript:  |
-          chmod +x $GITHUB_WORKSPACE/code/buildContainerTemplate.sh
-          $GITHUB_WORKSPACE/code/buildContainerTemplate.sh -f $SRC_FOLDER \
+          chmod +x $GITHUB_WORKSPACE/utils/buildContainerTemplate.sh
+          $GITHUB_WORKSPACE/utils/buildContainerTemplate.sh -f $SRC_FOLDER \
                                                            -g $GITHUB_WORKSPACE \
                                                            -s $SOURCE_LOCATION \
                                                            -u $AZ_ACR_NAME \
