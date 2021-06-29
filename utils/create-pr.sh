@@ -21,6 +21,7 @@ pr_user_email="agent@gitops.com"
 git config --global user.email $pr_user_email
 git config --global user.name $pr_user_name
 
+
 # Clone manifests repo
 echo "Clone manifests repo"
 repo_url="${DEST_REPO#http://}"
