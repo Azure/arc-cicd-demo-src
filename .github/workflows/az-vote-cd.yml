@@ -71,5 +71,5 @@ jobs:
           echo $GITHUB_REF | awk -F"release/" '{print $2}' 
           releasse_number=$(echo $GITHUB_REF | awk -F"release/" '{print $2}')
           [[ -z "$releasse_number" ]] || releasse_prefix=$(echo "release/"$releasse_number)  
-
-          ${{ github.workspace }}/utils/create-pr.sh -s ${{ github.workspace }}/gen_manifests -d ${{ secrets.MANIFESTS_FOLDER }} -r ${{ secrets.MANIFESTS_REPO }} -b $releasse_prefix/${{ secrets.MANIFESTS_BRANCH }} -i $GITHUB_RUN_ID -t ${{ secrets.PAT }} -e ${{ secrets.ENVIRONMENT_NAME }}
+          
+          ${{ github.workspace }}/utils/create-pr.sh -s ${{ github.workspace }}/gen_manifests -d ${{ secrets.MANIFESTS_FOLDER }} -r ${{ secrets.MANIFESTS_REPO }} -b $(echo $release_prefix)${{ secrets.MANIFESTS_BRANCH }} -i $GITHUB_RUN_ID -t ${{ secrets.PAT }} -e ${{ secrets.ENVIRONMENT_NAME }}        
