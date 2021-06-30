@@ -33,7 +33,7 @@ jobs:
           name: image_tags
           workflow: az-vote-cicd.yml
           run_id: ${{ github.event.client_payload.runid }}
-          path: ${{ github.workspace }}/images
+          path: ${{ github.workspace }}/image_tags
       - name: Download Manifests Templates
         uses: dawidd6/action-download-artifact@v2
         with:
@@ -52,7 +52,7 @@ jobs:
         env:
           ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
         run: |
-          for file in ${{ github.workspace }}/images/*; do echo "::set-env name=${file##*/}::$(cat $file)"; done 
+          for file in ${{ github.workspace }}/image_tags/*; do echo "::set-env name=${file##*/}::$(cat $file)"; done 
       - name: Generate Manifests
         run: |
           chmod +x ${{ github.workspace }}/utils/generate-manifests.sh
