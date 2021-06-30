@@ -94,7 +94,7 @@ stages:
       # Once the reverting PR is merged, Flux will reconcile it to the cluster
       - job: rollback_deployment      
         dependsOn: [Automated_testing, Deploy_to_stage]
-        condition: failed(Automated_testing)
+        condition: failed('Automated_testing')
         displayName: Rollback Deployment      
         variables:
           pr_num: $[ dependencies.Deploy_to_stage.outputs['Deploy_to_stage.Create_PR.PR_NUM'] ]
