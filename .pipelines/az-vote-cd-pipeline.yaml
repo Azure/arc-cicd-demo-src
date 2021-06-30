@@ -33,12 +33,6 @@ stages:
   - stage: "deploy_dev"
     displayName: "Deploy to Dev"
     jobs:
-      - job: "Automated_testing"
-        displayName: Automated testing 
-        dependsOn: deploy_with_gitops
-        steps:
-        - template: post-deployment-test-template.yaml
-
       - deployment: Deploy_to_dev
         displayName: "Deploy to Dev"
         environment: dev
@@ -58,11 +52,11 @@ stages:
         steps:   
         - template: pr-completion-task-template.yaml                 
 
-      # - job: "Automated_testing"
-      #   displayName: Automated testing 
-      #   dependsOn: deploy_with_gitops
-      #   steps:
-      #   - template: post-deployment-test-template.yaml
+      - job: "Automated_testing"
+        displayName: Automated testing 
+        dependsOn: deploy_with_gitops
+        steps:
+        - template: post-deployment-test-template.yaml
 
 
   - stage: "deploy_stage"
