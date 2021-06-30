@@ -17,6 +17,10 @@ jobs:
       run: |
         chmod +x ${{ github.workspace }}/utils/smoke-test.sh
         ${{ github.workspace }}/utils/smoke-test.sh
+      env:
+        AKS_RESOURCE_GROUP: ${{ secrets.AKS_RESOURCE_GROUP }}
+        AKS_NAME: ${{ secrets.AKS_NAME }}
+        TARGET_NAMESPACE: ${{ secrets.TARGET_NAMESPACE }}
   Deploy_to_Stage:
       name: "Deploy to Stage"
       runs-on: ubuntu-latest
