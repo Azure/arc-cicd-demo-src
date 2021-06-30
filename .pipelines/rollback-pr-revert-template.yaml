@@ -1,0 +1,14 @@
+# Pipeline Template to rollback deployment by reverting the pull request. 
+
+steps:
+
+- task: Bash@3        
+  name: "RevertPR"
+  displayName: "Revert Pull request"
+  inputs:
+    filePath: $(System.DefaultWorkingDirectory)/utils/revert-pr.sh
+    arguments: '-r $(MANIFESTS_REPO) -b refs/heads/$(MANIFESTS_BRANCH) -p $(pr_num)'
+  env:
+    SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+
+    

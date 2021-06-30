@@ -82,9 +82,22 @@ stages:
         condition: ne(variables['pr_num'],'')        
         steps:   
         - template: pr-completion-task-template.yaml  
-
+      
       - job: "Automated_testing"
         displayName: Automated testing 
         dependsOn: deploy_with_gitops
         steps:
         - template: post-deployment-test-template.yaml
+
+      # A sample demonstrating a rollback of the latest change if automated testing fails
+      # It issues a reverting PR to the manifests repo. 
+      # Once the reverting PR is merged, Flux will reconcile it to the cluster
+      - job: rollback_deployment      
+        dependsOn: [Automated_testing, Deploy_to_stage]
+        condition: failed(Automated_testing)
+        displayName: Rollback Deployment      
+        variables:
+          pr_num: $[ dependencies.Deploy_to_stage.outputs['Deploy_to_stage.Create_PR.PR_NUM'] ]
+        steps:   
+        - template: rollback-pr-revert-template.yaml                        
+
