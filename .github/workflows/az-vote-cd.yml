@@ -3,7 +3,7 @@ name: CD_Stage
  
 on:
   repository_dispatch:
-    types: [dev-sync-success]
+    types: [sync-success]
 
 jobs:
   Test_Dev:
