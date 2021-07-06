@@ -8,6 +8,10 @@ resources:
       trigger:
         branches:
           - master
+  repositories:
+    - repository: Manifest
+      type: git
+      name: arc-cicd-demo-gitops
 
 name: $(Date:yyyyMMdd)$(Rev:.r)
 
