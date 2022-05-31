@@ -1,4 +1,4 @@
 title: "$VOTE_APP_TITLE"
 serviceType: ClusterIP
 imageRepo: $AZURE_VOTE_IMAGE_REPO
-demoAppUrl: $DEMO_APP_URL
+demoAppUrl: "/"

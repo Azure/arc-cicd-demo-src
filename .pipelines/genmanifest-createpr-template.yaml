@@ -28,18 +28,23 @@ steps:
 - script: |
    echo "Create a new branch ${{ parameters.DEPLOY_BRANCH_NAME }}"   
    git checkout -b ${{ parameters.DEPLOY_BRANCH_NAME }}
-   mkdir -p $(MANIFESTS_FOLDER)
-   cp -r $(Build.SourcesDirectory)/gen_manifests/* $(MANIFESTS_FOLDER)/
+   cp -r $(Build.SourcesDirectory)/gen_manifests/* ./
    git add -A
-   git commit -m "deployment $(Build.BuildNumber)"
-   git push --set-upstream origin ${{ parameters.DEPLOY_BRANCH_NAME }}
+   echo "##vso[task.setvariable variable=GIT_STATUS]$(git status --porcelain | head -1)"   
   displayName: Add Generated Manifest to New Branch
   workingDirectory: ${{ parameters.MANIFEST_DIR }}
 
 - script: |
+   git commit -m "deployment $(Build.BuildNumber)"
+   git push --set-upstream origin ${{ parameters.DEPLOY_BRANCH_NAME }}
    echo $(System.AccessToken) | az devops login
-   az devops configure --defaults organization=https://dev.azure.com/$(ORGANIZATION_NAME) project="$(PROJECT_NAME)" --use-git-aliases true
-   az repos pr create --project $(PROJECT_NAME) --repository $(MANIFESTS_REPO) --target-branch $(MANIFESTS_BRANCH) --source-branch ${{ parameters.DEPLOY_BRANCH_NAME }} --title "deployment $(Build.BuildNumber)" --squash
-  env:
-    AZURE_DEVOPS_CLI_PAT: $(System.AccessToken)
+   az devops configure --defaults organization=$(System.CollectionUri) project=$(System.TeamProject) --use-git-aliases true
+   pr_response=$(az repos pr create --project $(System.TeamProject) --repository $(MANIFESTS_REPO) --target-branch $(MANIFESTS_BRANCH) --source-branch ${{ parameters.DEPLOY_BRANCH_NAME }}  --title "deployment $(Build.BuildNumber)" --squash -o json)
+   echo $pr_response
+   export pr_num=$(echo $pr_response | jq '.pullRequestId')
+   echo "pr_num="$pr_num
+   echo "##vso[task.setvariable variable=PR_NUM;isOutput=true]$pr_num"
   displayName: Create Pull Request   
+  condition: ne(variables['GIT_STATUS'], '')
+  name: "Create_PR" 
+  workingDirectory: ${{ parameters.MANIFEST_DIR }}

@@ -1,0 +1,83 @@
+
+name: CD_Stage
+ 
+on:
+  repository_dispatch:
+    types: [sync-success]
+
+jobs:
+  Test_Dev:
+    name: "Test Dev"
+    runs-on: ubuntu-latest
+    environment: az-vote-app-dev
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2.3.4
+    - name: Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    - name: Automated Test
+      run: |
+        chmod +x ${{ github.workspace }}/utils/smoke-test.sh
+        ${{ github.workspace }}/utils/smoke-test.sh
+      env:
+        AKS_RESOURCE_GROUP: ${{ secrets.AKS_RESOURCE_GROUP }}
+        AKS_NAME: ${{ secrets.AKS_NAME }}
+        TARGET_NAMESPACE: ${{ secrets.TARGET_NAMESPACE }}
+  Deploy_to_Stage:
+      name: "Deploy to Stage"
+      runs-on: ubuntu-latest
+      needs: Test_Dev
+      environment: az-vote-app-stage
+      steps:
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+        with:
+          ref: ${{ github.event.client_payload.sha }}
+      - name: Download Image Tags
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: image_tags
+          workflow: az-vote-cicd.yml
+          run_id: ${{ github.event.client_payload.runid }}
+          path: ${{ github.workspace }}/image_tags
+      - name: Download Manifests Templates
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: manifests
+          workflow: az-vote-cicd.yml
+          run_id: ${{ github.event.client_payload.runid }}
+          path: ${{ github.workspace }}/manifests
+      - name: Download Utils
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          name: utils
+          workflow: az-vote-cicd.yml
+          run_id: ${{ github.event.client_payload.runid }}
+          path: ${{ github.workspace }}/utils
+      - name: Read Image Tags
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
+        run: |
+          for file in ${{ github.workspace }}/image_tags/*; do echo "::set-env name=${file##*/}::$(cat $file)"; done 
+      - name: Generate Manifests
+        run: |
+          chmod +x ${{ github.workspace }}/utils/generate-manifests.sh
+          ${{ github.workspace }}/utils/generate-manifests.sh manifests gen_manifests
+        env:
+          TARGET_NAMESPACE: ${{ secrets.TARGET_NAMESPACE }}
+          VOTE_APP_TITLE: ${{ secrets.VOTE_APP_TITLE }}
+          DEMO_APP_URL: ${{ secrets.DEMO_APP_URL }}
+          AZURE_VOTE_IMAGE_REPO: ${{ secrets.AZURE_VOTE_IMAGE_REPO }}
+          SYSTEM_LABEL: ${{ secrets.SYSTEM_LABEL }}
+      - name: Create PR
+        run: |
+          chmod +x ${{ github.workspace }}/utils/create-pr.sh
+          # Extract release number from the branch name
+          # If it is a release branch, add a prefix to the manifests branch
+          echo $GITHUB_REF | awk -F"release/" '{print $2}' 
+          releasse_number=$(echo $GITHUB_REF | awk -F"release/" '{print $2}')
+          [[ -z "$releasse_number" ]] || releasse_prefix=$(echo "release/"$releasse_number)  
+          
+          ${{ github.workspace }}/utils/create-pr.sh -s ${{ github.workspace }}/gen_manifests -d ${{ secrets.MANIFESTS_FOLDER }} -r ${{ secrets.MANIFESTS_REPO }} -b $(echo $release_prefix)${{ secrets.MANIFESTS_BRANCH }} -i $GITHUB_RUN_ID -t ${{ secrets.PAT }} -e ${{ secrets.ENVIRONMENT_NAME }}        
