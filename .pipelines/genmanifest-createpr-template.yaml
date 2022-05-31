@@ -8,8 +8,6 @@ parameters:
 
 steps:
 - checkout: self
-# - checkout: git://$(System.TeamProject)/$(MANIFESTS_REPO)
-#   persistCredentials: true
 - checkout: Manifest
   persistCredentials: true
 
