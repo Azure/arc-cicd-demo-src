@@ -7,6 +7,7 @@ resources:
       source: "arc-cicd-demo-src CI"
       trigger:
         branches:
+          include: 
           - master
   repositories:
     - repository: Manifest
