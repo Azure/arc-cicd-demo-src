@@ -24,6 +24,7 @@ set -euxo pipefail  # fail on error
 # Generate an tag with a reproducible checksum of all files in . by doing a checksum of all files
 # in alphabetical order, then another checksum of their names and checksums.
 # Running this command on windows-based infrastructure may return a different result due to CRLF
+git config --global --add safe.directory $GITHUB_WORKSPACE
 pushd $GITHUB_WORKSPACE/$SRC_FOLDER/$SOURCE_LOCATION
 imageTag=$(git log -n 1 --format="%H" -- ".")
 popd
