@@ -45,7 +45,8 @@ jobs:
         SOURCE_LOCATION: src/azure-vote-back
         DOCKER_FILE: Dockerfile
         REPOSITORY: azvote/azure-vote-back
-        TASKNAME: BACKEND_IMAGE   
+        TASKNAME: BACKEND_IMAGE  
+        AZ_ACR_NAME: yuteacr
       uses: Azure/cli@1.0.4
       with:
         inlineScript:  |
