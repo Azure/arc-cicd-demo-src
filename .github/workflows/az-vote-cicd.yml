@@ -27,7 +27,8 @@ jobs:
         SOURCE_LOCATION: src/azure-vote-front 
         DOCKER_FILE: Dockerfile
         REPOSITORY: azvote/azure-vote-front
-        TASKNAME: FRONTEND_IMAGE   
+        TASKNAME: FRONTEND_IMAGE
+        AZ_ACR_NAME: yuteacr
       uses: Azure/cli@1.0.4
       with:
         inlineScript:  |
