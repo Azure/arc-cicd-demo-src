@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SRC_FOLDER: azure-vote
-      AZ_ACR_NAME: gitopsflowacr
+      IMAGE_REPO_NAME: azvote      
     steps:
     - name: Checkout
       uses: actions/checkout@v2.3.4
@@ -26,8 +26,9 @@ jobs:
       env:
         SOURCE_LOCATION: src/azure-vote-front 
         DOCKER_FILE: Dockerfile
-        REPOSITORY: azvote/azure-vote-front
-        TASKNAME: FRONTEND_IMAGE   
+        IMAGE_NAME: azure-vote-front
+        TASKNAME: FRONTEND_IMAGE
+        AZ_ACR_NAME: ${{ secrets.AZ_ACR_NAME }}   
       uses: Azure/cli@1.0.4
       with:
         inlineScript:  |
@@ -36,15 +37,16 @@ jobs:
                                                            -g $GITHUB_WORKSPACE \
                                                            -s $SOURCE_LOCATION \
                                                            -u $AZ_ACR_NAME \
-                                                           -r $REPOSITORY \
+                                                           -r $IMAGE_REPO_NAME/$IMAGE_NAME \
                                                            -t $TASKNAME \
                                                            -d $DOCKER_FILE
     - name: Create Backend Image Tags
       env:
         SOURCE_LOCATION: src/azure-vote-back
         DOCKER_FILE: Dockerfile
-        REPOSITORY: azvote/azure-vote-back
-        TASKNAME: BACKEND_IMAGE   
+        IMAGE_NAME: azure-vote-back
+        TASKNAME: BACKEND_IMAGE
+        AZ_ACR_NAME: ${{ secrets.AZ_ACR_NAME }}   
       uses: Azure/cli@1.0.4
       with:
         inlineScript:  |
@@ -53,7 +55,7 @@ jobs:
                                                            -g $GITHUB_WORKSPACE \
                                                            -s $SOURCE_LOCATION \
                                                            -u $AZ_ACR_NAME \
-                                                           -r $REPOSITORY \
+                                                           -r $IMAGE_REPO_NAME/$IMAGE_NAME \
                                                            -t $TASKNAME \
                                                            -d $DOCKER_FILE
     - name: Upload Image Tags
@@ -106,7 +108,7 @@ jobs:
         TARGET_NAMESPACE: ${{ secrets.TARGET_NAMESPACE }}
         VOTE_APP_TITLE: ${{ secrets.VOTE_APP_TITLE }}
         DEMO_APP_URL: ${{ secrets.DEMO_APP_URL }}
-        AZURE_VOTE_IMAGE_REPO: ${{ secrets.AZURE_VOTE_IMAGE_REPO }}
+        AZURE_VOTE_IMAGE_REPO: ${{ secrets.AZ_ACR_NAME }}/.azurecr.io/${{ env.IMAGE_REPO_NAME }}
         SYSTEM_LABEL: ${{ secrets.SYSTEM_LABEL }}
     - name: Create PR
       run: |
