@@ -17,6 +17,8 @@ steps:
   inputs:
     filePath: $(utils_artifact_path)/generate-manifests.sh
     arguments: '$(manifests_artifact_path) gen_manifests'
+  env:
+    AZURE_VOTE_IMAGE_REPO: $(AZ_ACR_NAME).azurecr.io/azvote
 
 - script: git config --global user.email $PR_USER_EMAIL & git config --global user.name $PR_USER_NAME
   displayName: Configure Git
@@ -38,8 +40,8 @@ steps:
    git commit -m "deployment $(Build.BuildNumber)"
    git push --set-upstream origin ${{ parameters.DEPLOY_BRANCH_NAME }}
    echo $(System.AccessToken) | az devops login
-   az devops configure --defaults organization=$(System.CollectionUri) project=$(System.TeamProject) --use-git-aliases true
-   pr_response=$(az repos pr create --project $(System.TeamProject) --repository $(MANIFESTS_REPO) --target-branch $(MANIFESTS_BRANCH) --source-branch ${{ parameters.DEPLOY_BRANCH_NAME }}  --title "deployment $(Build.BuildNumber)" --squash -o json)
+   az devops configure --defaults organization=$(System.CollectionUri) project="$(System.TeamProject)" --use-git-aliases true
+   pr_response=$(az repos pr create --project "$(System.TeamProject)" --repository $(MANIFESTS_REPO) --target-branch $(MANIFESTS_BRANCH) --source-branch ${{ parameters.DEPLOY_BRANCH_NAME }}  --title "deployment $(Build.BuildNumber)" --squash -o json)
    echo $pr_response
    export pr_num=$(echo $pr_response | jq '.pullRequestId')
    [ -z "$pr_num" ] && exit 1
