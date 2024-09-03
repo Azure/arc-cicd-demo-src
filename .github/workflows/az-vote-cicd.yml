@@ -82,17 +82,17 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2.3.4
     - name: Download Image Tags
-      uses: actions/download-artifact@v2.0.8
+      uses: actions/download-artifact@v4.1.7
       with:
         name: image_tags
         path: ${{ github.workspace }}/image_tags
     - name: Download Manifests Templates
-      uses: actions/download-artifact@v2.0.8
+      uses: actions/download-artifact@v4.1.7
       with:
         name: manifests
         path: ${{ github.workspace }}/manifests
     - name: Download Utils
-      uses: actions/download-artifact@v2.0.8
+      uses: actions/download-artifact@v4.1.7
       with:
         name: utils
         path: ${{ github.workspace }}/utils
