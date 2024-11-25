@@ -36,21 +36,21 @@ jobs:
         with:
           ref: ${{ github.event.client_payload.sha }}
       - name: Download Image Tags
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           name: image_tags
           workflow: az-vote-cicd.yml
           run_id: ${{ github.event.client_payload.runid }}
           path: ${{ github.workspace }}/image_tags
       - name: Download Manifests Templates
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           name: manifests
           workflow: az-vote-cicd.yml
           run_id: ${{ github.event.client_payload.runid }}
           path: ${{ github.workspace }}/manifests
       - name: Download Utils
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v6
         with:
           name: utils
           workflow: az-vote-cicd.yml
