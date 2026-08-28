@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout Source
-      uses: actions/checkout@v2.3.4
+      uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2.3.4
       with: 
         token: ${{ secrets.PAT }}
 
@@ -31,7 +31,7 @@ jobs:
 
 
     - name: Checkout Manifests
-      uses: actions/checkout@v2
+      uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2.8.0
       with: 
         repository: ${{ github.repository_owner }}/${{ secrets.MANIFESTS_REPO_NAME }}
         path: manifests
@@ -49,7 +49,7 @@ jobs:
       working-directory: manifests
 
     - name: Checkout Fleet
-      uses: actions/checkout@v2
+      uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2.8.0
       with: 
         repository: ${{ github.repository_owner }}/${{ secrets.FLEET_REPO_NAME }}
         path: fleet
@@ -66,7 +66,7 @@ jobs:
       working-directory: fleet
     
     - name: Create Pull Request to Dev fleet
-      uses: peter-evans/create-pull-request@v3
+      uses: peter-evans/create-pull-request@18f7dc018cc2cd597073088f7c7591b9d1c02672 # v3.14.0
       with: 
         path: fleet
         token: ${{ secrets.PAT }}
@@ -80,7 +80,7 @@ jobs:
       working-directory: fleet
     
     - name: Create Pull Request to Stage fleet
-      uses: peter-evans/create-pull-request@v3
+      uses: peter-evans/create-pull-request@18f7dc018cc2cd597073088f7c7591b9d1c02672 # v3.14.0
       with: 
         path: fleet
         token: ${{ secrets.PAT }}

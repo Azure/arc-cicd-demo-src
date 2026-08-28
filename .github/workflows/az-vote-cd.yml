@@ -12,9 +12,9 @@ jobs:
     environment: az-vote-app-dev
     steps:
     - name: Checkout
-      uses: actions/checkout@v2.3.4
+      uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2.3.4
     - name: Azure Login
-      uses: azure/login@v1
+      uses: azure/login@cb79c773a3cfa27f31f25eb3f677781210c9ce3d # v1.6.1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
     - name: Automated Test
@@ -32,25 +32,25 @@ jobs:
       environment: az-vote-app-stage
       steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@5a4ac9002d0be2fb38bd78e4b4dbde5606d7042f # v2.3.4
         with:
           ref: ${{ github.event.client_payload.sha }}
       - name: Download Image Tags
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
         with:
           name: image_tags
           workflow: az-vote-cicd.yml
           run_id: ${{ github.event.client_payload.runid }}
           path: ${{ github.workspace }}/image_tags
       - name: Download Manifests Templates
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
         with:
           name: manifests
           workflow: az-vote-cicd.yml
           run_id: ${{ github.event.client_payload.runid }}
           path: ${{ github.workspace }}/manifests
       - name: Download Utils
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@268677152d06ba59fcec7a7f0b5d961b6ccd7e1e # v2.28.0
         with:
           name: utils
           workflow: az-vote-cicd.yml
